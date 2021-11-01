@@ -37,6 +37,12 @@ class Person(BaseModel): #Clase persona el nombre del modelo que llamaremos con 
 #A nosotros de la persona nos interesa los primeros tres
 #los ultimo dos pueden ser opcionales por eso importamos Optional de Python
 
+class Location(BaseModel): #Definimos el modelo Location para pedirle al cliente en la path opetaion del put que nos envie dos Request Body
+    city: str
+    state: str
+    country: str
+
+
 #######################################
 @app.get("/") #path operation decorator .. etsamos usando la operation get en el path / es decir el metodo HTTP get en el endpoint /
 def home():  #el primer lugar que un usuario de nuestra API va aparecer cuando entre a la misma   #path operation function
@@ -90,3 +96,20 @@ def show_person(
     person_id: int = Path(..., gt=0)  # ser obligatorio, ademas definimos que no nos pasen un id= 0 u negativo usamos gt great >0
 ):
     return{person_id: "It exists!"} #respondemos un json con esta estructura
+
+#Validaciones: Request Body 
+
+@app.put("/person/{person_id}")     #para actualizar un determinado contenido en nuestra aplicación, cada vez que un usuario haga una peticionde tipo put a este endpoint ("/person/{person_id}") y un id en particular vamos a poder actualizar un contenido de esa persona , el cliente  le va tener que enviar a la API un Request Body
+def update_person(
+    person_id: int = Path(
+        ...,
+        title= "Person ID",
+        description= "This is the person ID",
+        gt=0   #le colocamos que este id debe ser mayor a cero
+    ),
+    person: Person = Body(...),  #ademas estamos recibiento en esta path operatoon en espeacial un Request Body y le debo poner un nombre person me va enviar la información de la persona
+    Location: Location = Body(...)  #pero que pasa si tambien le pedimos al cliente ptro parametro como location
+):     
+    results = person.dict()                 # para este caso cuandoq queremos combinar dos json debemos hacerlo de manera explicita con person.dict() convertimos el Request body person que viene como json convertido  en un diccionario
+    results.update(Location.dict())  # aqui estamos combinando el diccionarion person con el diccionario location en una sola variable
+    return results         # convertir primero person a diccionario y con el metodo update de este diccionario unir otro diccionario
