@@ -9,6 +9,8 @@ from pydantic import BaseModel #Con BaseModel voy a poder crear modelos dentro d
 #FastAPI  importamos todo lo que necesitamos de FastAPI
 from fastapi import FastAPI #la clase FastApi viene del modulo fastapi , y es la clase la que permite que todo el framework funcione
 from fastapi import Body  #Body es una clase de fastAPI que a mi me permite decir explisitamente que un parametro que a mi me esta llegando es de tipo Body
+from fastapi import Query
+from fastapi import Path
 
 #lo primero es definir una variable app que va contener toda mi aplicacion
 #para inicializarla bien vamos a colocarle una instancia de la clase FastAPI
@@ -61,3 +63,30 @@ def create_person(person: Person = Body(...)): #el constructor de esta clase Bod
 #Analicemos desde la route path operation, tengo la path operation decorator que me dice que el cliente a traves de una peticion tipo POST es decir usando una operaciond e tipo POST accediendo a este path ("/person/new") 
 #va a obtener una persona, una persona que esta sujeta al modelo de arriba, y esta persona va ser enviada al servidor por que es una peticion de tipo POST para por ejemplo guardarla en una base de datos por que estamos creando una nueva persona
 #como yo se que esta persona es un Request Body por que aqui (person: Person = Body(...)) estoy colocando el nombre del parametro : el tipo por el tipado estatico a Body que es obligatorio 
+
+#Validaciones: Query Parameters
+@app.get("/person/detail")
+def show_person(
+    name : Optional[str] = Query(
+        None, 
+        min_length=1, 
+        max_length=50, #por buenas practicas si tenemos varios querys parameters ordenamos asi con los saltos de linea
+        title= "Person Name", #para definir un titulo en la documentación automatica    IMPORTANTE EN SWAGGER IA no aparece el titulo pero es por swagger en redocs si aparece
+        description= "This is the person name. It's between 1 and 50 characters"  #Definimos una descripción para que quede mas claro para el usuario de nuestra API
+        ),    #los query parameters son opcionales llamamos la clase Query y el default es None por que no nos podria llegar nada pero si la persona llegase a mandar algo a escribir algo ya sabemos que el min_length=1, max_length=50
+    age: str = Query(
+        ...,
+        title= "Person Age",
+        description= "This is the person age. It's required"
+        ) # pero aqui le vamos a poner que debe ser obligatorio por alguna razon , esto no e slo ideal pero podria pasar, ademas lo obligatorios deben ser un path parameter no un query parameter pero podria llegar a pasar
+): # vamos a necesitar dos query parameters y los pongo en los parametros de la definicion de la funcion
+    return {name: age} # retornamos un json con las dos variables
+
+#Validaciones: Path Parameters
+#python lee el codigo de izquierda a derecha y de arriba hacia abajo y como fatsAPI esta funcionando sobre python vamos a tener el mismo caso
+#si nosotros tenemos 2 endpoints 2 paths operations que se corresponden en el mismo path a la misma ruta la que va a valer es la ultima por que python va empezar a leer desde el principio se va encontrar con un path operation y si se llega encontrar con uno que tiene el mismo endpoint va tomar el ultimo que se encontro
+@app.get("/person/detail/{person_id}")
+def show_person(
+    person_id: int = Path(..., gt=0)  # ser obligatorio, ademas definimos que no nos pasen un id= 0 u negativo usamos gt great >0
+):
+    return{person_id: "It exists!"} #respondemos un json con esta estructura
