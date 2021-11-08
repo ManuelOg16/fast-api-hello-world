@@ -1,10 +1,10 @@
 #Respetar este orden importacion para tener el codigo d forma limpia
 #Python importo cosas de esta libreria la cual esta por encima de Pydantic
 from typing import Optional # Con optional puedo hacer tipado estatico
-
+from enum import Enum # nos sirve para crear enumeraciones de strings nos va servir para poder definir perfectamente la validación del atributo hair
 #Pydantic importamos cosas de esta libreria por que este orden por que Pydantic es una libreria que esta por debajo de FastAPI
 from pydantic import BaseModel #Con BaseModel voy a poder crear modelos dentro de mi API
-
+from pydantic import Field
 
 #FastAPI  importamos todo lo que necesitamos de FastAPI
 from fastapi import FastAPI #la clase FastApi viene del modulo fastapi , y es la clase la que permite que todo el framework funcione
@@ -28,12 +28,31 @@ app= FastAPI()
 
 #Por el momento vamos a crear aqui los modelos necesarios para nuestra aplicacion
 #Models
+#al principio de los modelos aqui vamos a poner todos los modelos que vamos a crear
+class  HairColor(Enum):  #Esta hereda de Enum
+    white= "white"
+    brown = "brown"
+    black = "black"
+    blonde = "blonde"
+    red = "red"
+# para poder usar esto y que el hair_color que nos envie el usuario si o si sea uno de estos y no otro 
+
 class Person(BaseModel): #Clase persona el nombre del modelo que llamaremos con la pathoperation de abajo, esta clase debe heredar de BaseModel
-    first_name: str           #para definir un modelo segun pydantic vamos a colocar primero las caracteristicas los atributos de este modelo de esta entidad
-    last_name: str
-    age: int
-    hair_color: Optional[str]= None    #esto e sun valor opcional pero debe tener un valor por defecto por si la persona no me envia nada tiene que haber algo dentro de hair_color normalmente con dbs es null en python es None esto quiere decir que puede haber algo o no
-    is_married: Optional[bool] = None
+    first_name: str = Field(    #para definir un modelo segun pydantic vamos a colocar primero las caracteristicas los atributos de este modelo de esta entidad
+        ...,                     #Field es igual a un campo d enuestro modelo usando la clase Field
+        min_length=1,
+        max_length=50)       
+    last_name: str = Field( 
+        ...,
+        min_length=1,
+        max_length=50) 
+    age: int = Field(
+       ...,
+        gt=0,
+        le=115
+    )
+    hair_color: Optional[HairColor]= Field(default=None) # antes estaba el str sin Field ahora ponemos la clase HairColor lo cual nos asegura que los valores deben ser lo que pusimos dentro de esta clase       #esto e sun valor opcional pero debe tener un valor por defecto por si la persona no me envia nada tiene que haber algo dentro de hair_color normalmente con dbs es null en python es None esto quiere decir que puede haber algo o no
+    is_married: Optional[bool] = Field(default=None)
 #A nosotros de la persona nos interesa los primeros tres
 #los ultimo dos pueden ser opcionales por eso importamos Optional de Python
 
