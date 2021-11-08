@@ -113,12 +113,14 @@ def show_person(
         min_length=1, 
         max_length=50, #por buenas practicas si tenemos varios querys parameters ordenamos asi con los saltos de linea
         title= "Person Name", #para definir un titulo en la documentación automatica    IMPORTANTE EN SWAGGER IA no aparece el titulo pero es por swagger en redocs si aparece
-        description= "This is the person name. It's between 1 and 50 characters"  #Definimos una descripción para que quede mas claro para el usuario de nuestra API
+        description= "This is the person name. It's between 1 and 50 characters",  #Definimos una descripción para que quede mas claro para el usuario de nuestra API
+        example="Rocío" #path y query parametrs automaticos
         ),    #los query parameters son opcionales llamamos la clase Query y el default es None por que no nos podria llegar nada pero si la persona llegase a mandar algo a escribir algo ya sabemos que el min_length=1, max_length=50
     age: str = Query(
         ...,
         title= "Person Age",
-        description= "This is the person age. It's required"
+        description= "This is the person age. It's required",
+        example=25  #path y query parametrs automaticos documentacion
         ) # pero aqui le vamos a poner que debe ser obligatorio por alguna razon , esto no e slo ideal pero podria pasar, ademas lo obligatorios deben ser un path parameter no un query parameter pero podria llegar a pasar
 ): # vamos a necesitar dos query parameters y los pongo en los parametros de la definicion de la funcion
     return {name: age} # retornamos un json con las dos variables
@@ -128,7 +130,11 @@ def show_person(
 #si nosotros tenemos 2 endpoints 2 paths operations que se corresponden en el mismo path a la misma ruta la que va a valer es la ultima por que python va empezar a leer desde el principio se va encontrar con un path operation y si se llega encontrar con uno que tiene el mismo endpoint va tomar el ultimo que se encontro
 @app.get("/person/detail/{person_id}")
 def show_person(
-    person_id: int = Path(..., gt=0)  # ser obligatorio, ademas definimos que no nos pasen un id= 0 u negativo usamos gt great >0
+    person_id: int = Path(
+    ..., 
+    gt=0,
+    example=21 #path y query parametrs automaticos documentacion
+    ) 
 ):
     return{person_id: "It exists!"} #respondemos un json con esta estructura
 
@@ -140,10 +146,11 @@ def update_person(
         ...,
         title= "Person ID",
         description= "This is the person ID",
-        gt=0   #le colocamos que este id debe ser mayor a cero
-    ),
+        gt=0,   #le colocamos que este id debe ser mayor a cero
+        example=21   #path y query parametrs automaticos documentacion
+    ), 
     person: Person = Body(...),  #ademas estamos recibiento en esta path operatoon en espeacial un Request Body y le debo poner un nombre person me va enviar la información de la persona
-    # Location: Location = Body(...)  #pero que pasa si tambien le pedimos al cliente ptro parametro como location
+    Location: Location = Body(...)  #pero que pasa si tambien le pedimos al cliente ptro parametro como location
 ):     
     results = person.dict()                 # para este caso cuandoq queremos combinar dos json debemos hacerlo de manera explicita con person.dict() convertimos el Request body person que viene como json convertido  en un diccionario
     results.update(Location.dict())  # aqui estamos combinando el diccionarion person con el diccionario location en una sola variable
