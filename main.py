@@ -41,18 +41,34 @@ class Person(BaseModel): #Clase persona el nombre del modelo que llamaremos con 
     first_name: str = Field(    #para definir un modelo segun pydantic vamos a colocar primero las caracteristicas los atributos de este modelo de esta entidad
         ...,                     #Field es igual a un campo d enuestro modelo usando la clase Field
         min_length=1,
-        max_length=50)       
+        max_length=50,
+        example="Victor"
+        )     # otra forma de llenar los datos automatizamente  
     last_name: str = Field( 
         ...,
         min_length=1,
-        max_length=50) 
+        max_length=50,
+        example="Ocampo") 
     age: int = Field(
        ...,
         gt=0,
-        le=115
+        le=115,
+        example=36
     )
     hair_color: Optional[HairColor]= Field(default=None) # antes estaba el str sin Field ahora ponemos la clase HairColor lo cual nos asegura que los valores deben ser lo que pusimos dentro de esta clase       #esto e sun valor opcional pero debe tener un valor por defecto por si la persona no me envia nada tiene que haber algo dentro de hair_color normalmente con dbs es null en python es None esto quiere decir que puede haber algo o no
     is_married: Optional[bool] = Field(default=None)
+    #para uatomatizar los datos a la hora de probar la API una subclase dentro de la clase Person
+    #esta e suna manera pero hay otra forma la de arriba con example
+    # class Config:
+    #     schema_extra = {   #este atributo nos sirve para definir la información por defecto para la documentación esto va ser igual a un json a un diccionario 
+    #         "example": {   #se pone example por que si no no funciona
+    #             "first_name": "Manuel",
+    #             "last_name": "Ocampo Galvis",
+    #             "age": 36, 
+    #             "hair_color": "black",
+    #             "is_married": False
+    #         }
+    #     }
 #A nosotros de la persona nos interesa los primeros tres
 #los ultimo dos pueden ser opcionales por eso importamos Optional de Python
 
@@ -127,8 +143,9 @@ def update_person(
         gt=0   #le colocamos que este id debe ser mayor a cero
     ),
     person: Person = Body(...),  #ademas estamos recibiento en esta path operatoon en espeacial un Request Body y le debo poner un nombre person me va enviar la información de la persona
-    Location: Location = Body(...)  #pero que pasa si tambien le pedimos al cliente ptro parametro como location
+    # Location: Location = Body(...)  #pero que pasa si tambien le pedimos al cliente ptro parametro como location
 ):     
     results = person.dict()                 # para este caso cuandoq queremos combinar dos json debemos hacerlo de manera explicita con person.dict() convertimos el Request body person que viene como json convertido  en un diccionario
     results.update(Location.dict())  # aqui estamos combinando el diccionarion person con el diccionario location en una sola variable
     return results         # convertir primero person a diccionario y con el metodo update de este diccionario unir otro diccionario
+    
