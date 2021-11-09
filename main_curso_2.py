@@ -11,6 +11,7 @@ from fastapi import FastAPI #la clase FastApi viene del modulo fastapi , y es la
 from fastapi import Body  #Body es una clase de fastAPI que a mi me permite decir explisitamente que un parametro que a mi me esta llegando es de tipo Body
 from fastapi import Query
 from fastapi import Path
+from fastapi import status #este nos permite acceder a diferentes status code de HTTP
 
 app= FastAPI() 
 
@@ -53,14 +54,17 @@ class Person(PersonBase): #Clase persona el nombre del modelo que llamaremos con
 class PersonOut(PersonBase):
     pass
      
-class Location(BaseModel): #Definimos el modelo Location para pedirle al cliente en la path opetaion del put que nos envie dos Request Body
-    city: str
-    state: str
-    country: str
+# class Location(BaseModel): #Definimos el modelo Location para pedirle al cliente en la path opetaion del put que nos envie dos Request Body
+#     city: str
+#     state: str
+#     country: str
 
 
 #######################################
-@app.get("/") #path operation decorator .. etsamos usando la operation get en el path / es decir el metodo HTTP get en el endpoint /
+@app.get(
+    path="/",  #puedo poner path, que es tambien el endpoint la ruta
+    status_code=status.HTTP_200_OK
+    ) #path operation decorator .. etsamos usando la operation get en el path / es decir el metodo HTTP get en el endpoint /
 def home():  #el primer lugar que un usuario de nuestra API va aparecer cuando entre a la misma   #path operation function
     return {"Hello":"World"}   #cuando entremos al home vamos a retornar un json  y en python es un diccionario
 
@@ -69,13 +73,20 @@ def home():  #el primer lugar que un usuario de nuestra API va aparecer cuando e
 
 #Del video Request and Response Body
 #vamos a crear personas con sus datos
-@app.post("/person/new", response_model=PersonOut) #con el response_model=PersonOut vamos a devolder todo menos la contraseña xq la borramos en la clase  PersonOut    #vamos a enviar datos desde el cliente al servidor POST , si estuvieramos trayendo datos del servidor al cliente utilizariamos GET
+@app.post(
+    path="/person/new",         #este enpoint es para crear una persona por eso 201
+    response_model=PersonOut,
+    status_code=status.HTTP_201_CREATED  
+    ) #con el response_model=PersonOut vamos a devolder todo menos la contraseña xq la borramos en la clase  PersonOut    #vamos a enviar datos desde el cliente al servidor POST , si estuvieramos trayendo datos del servidor al cliente utilizariamos GET
 def create_person(person: Person = Body(...)): #el constructor de esta clase Body lleva una serie de parametros el primero es el ... significa que este Request Body es obligatorio esto significa que un parametro es obligatorio o q un atributo es obligatorio
     return person  #retornamos al parametro person
 
 
 #Validaciones: Query Parameters
-@app.get("/person/detail")
+@app.get(
+    path="/person/detail",    #estamos obteniendo un resultado y si todo sale bien necesitamos un 200
+    status_code=status.HTTP_200_OK
+    )
 def show_person(
     name : Optional[str] = Query(
         None, 
@@ -95,7 +106,9 @@ def show_person(
     return {name: age} # retornamos un json con las dos variables
 
 
-@app.get("/person/detail/{person_id}")
+@app.get(
+    path="/person/detail/{person_id}",
+    status_code=status.HTTP_200_OK)
 def show_person(
     person_id: int = Path(
     ..., 
@@ -107,7 +120,10 @@ def show_person(
 
 #Validaciones: Request Body 
 
-@app.put("/person/{person_id}")     #para actualizar un determinado contenido en nuestra aplicación, cada vez que un usuario haga una peticionde tipo put a este endpoint ("/person/{person_id}") y un id en particular vamos a poder actualizar un contenido de esa persona , el cliente  le va tener que enviar a la API un Request Body
+@app.put(
+    path="/person/{person_id}",
+    response_model=PersonOut,
+    status_code=status.HTTP_200_OK)     #para actualizar un determinado contenido en nuestra aplicación, cada vez que un usuario haga una peticionde tipo put a este endpoint ("/person/{person_id}") y un id en particular vamos a poder actualizar un contenido de esa persona , el cliente  le va tener que enviar a la API un Request Body
 def update_person(
     person_id: int = Path(
         ...,
@@ -117,9 +133,9 @@ def update_person(
         example=21   #path y query parametrs automaticos documentacion
     ), 
     person: Person = Body(...),  #ademas estamos recibiento en esta path operatoon en espeacial un Request Body y le debo poner un nombre person me va enviar la información de la persona
-    Location: Location = Body(...)  #pero que pasa si tambien le pedimos al cliente ptro parametro como location
+    # Location: Location = Body(...)  #pero que pasa si tambien le pedimos al cliente ptro parametro como location
 ):     
     results = person.dict()                 # para este caso cuandoq queremos combinar dos json debemos hacerlo de manera explicita con person.dict() convertimos el Request body person que viene como json convertido  en un diccionario
-    results.update(Location.dict())  # aqui estamos combinando el diccionarion person con el diccionario location en una sola variable
+    # results.update(Location.dict())  # aqui estamos combinando el diccionarion person con el diccionario location en una sola variable
     return results         # convertir primero person a diccionario y con el metodo update de este diccionario unir otro diccionario
     
