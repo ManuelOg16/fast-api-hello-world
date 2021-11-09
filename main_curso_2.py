@@ -24,8 +24,7 @@ class  HairColor(Enum):  #Esta hereda de Enum
     blonde = "blonde"
     red = "red"
 # para poder usar esto y que el hair_color que nos envie el usuario si o si sea uno de estos y no otro 
-
-class Person(BaseModel): #Clase persona el nombre del modelo que llamaremos con la pathoperation de abajo, esta clase debe heredar de BaseModel
+class PersonBase(BaseModel):
     first_name: str = Field(    #para definir un modelo segun pydantic vamos a colocar primero las caracteristicas los atributos de este modelo de esta entidad
         ...,                     #Field es igual a un campo d enuestro modelo usando la clase Field
         min_length=1,
@@ -45,31 +44,14 @@ class Person(BaseModel): #Clase persona el nombre del modelo que llamaremos con 
     )
     hair_color: Optional[HairColor]= Field(default=None) # antes estaba el str sin Field ahora ponemos la clase HairColor lo cual nos asegura que los valores deben ser lo que pusimos dentro de esta clase       #esto e sun valor opcional pero debe tener un valor por defecto por si la persona no me envia nada tiene que haber algo dentro de hair_color normalmente con dbs es null en python es None esto quiere decir que puede haber algo o no
     is_married: Optional[bool] = Field(default=None)
+class Person(PersonBase): #Clase persona el nombre del modelo que llamaremos con la pathoperation de abajo, esta clase debe heredar de BaseModel
     password: str = Field(
     ...,
     min_length=8
     )
 
-class PersonOut(BaseModel):
-    first_name: str = Field(    #para definir un modelo segun pydantic vamos a colocar primero las caracteristicas los atributos de este modelo de esta entidad
-        ...,                     #Field es igual a un campo d enuestro modelo usando la clase Field
-        min_length=1,
-        max_length=50,
-        example="Victor"
-        )     # otra forma de llenar los datos automatizamente  
-    last_name: str = Field( 
-        ...,
-        min_length=1,
-        max_length=50,
-        example="Ocampo") 
-    age: int = Field(
-       ...,
-        gt=0,
-        le=115,
-        example=36
-    )
-    hair_color: Optional[HairColor]= Field(default=None) # antes estaba el str sin Field ahora ponemos la clase HairColor lo cual nos asegura que los valores deben ser lo que pusimos dentro de esta clase       #esto e sun valor opcional pero debe tener un valor por defecto por si la persona no me envia nada tiene que haber algo dentro de hair_color normalmente con dbs es null en python es None esto quiere decir que puede haber algo o no
-    is_married: Optional[bool] = Field(default=None)
+class PersonOut(PersonBase):
+    pass
      
 class Location(BaseModel): #Definimos el modelo Location para pedirle al cliente en la path opetaion del put que nos envie dos Request Body
     city: str
