@@ -1,7 +1,8 @@
 #Respetar este orden importacion para tener el codigo d forma limpia
 #Python importo cosas de esta libreria la cual esta por encima de Pydantic
 from typing import Optional # Con optional puedo hacer tipado estatico
-from enum import Enum # nos sirve para crear enumeraciones de strings nos va servir para poder definir perfectamente la validación del atributo hair
+from enum import Enum
+from fastapi.param_functions import Form # nos sirve para crear enumeraciones de strings nos va servir para poder definir perfectamente la validación del atributo hair
 #Pydantic importamos cosas de esta libreria por que este orden por que Pydantic es una libreria que esta por debajo de FastAPI
 from pydantic import BaseModel #Con BaseModel voy a poder crear modelos dentro de mi API
 from pydantic import Field
@@ -12,7 +13,7 @@ from fastapi import Body  #Body es una clase de fastAPI que a mi me permite deci
 from fastapi import Query
 from fastapi import Path
 from fastapi import status #este nos permite acceder a diferentes status code de HTTP
-
+from fastapi import Form
 app= FastAPI() 
 
 #Por el momento vamos a crear aqui los modelos necesarios para nuestra aplicacion
@@ -45,6 +46,7 @@ class PersonBase(BaseModel):
     )
     hair_color: Optional[HairColor]= Field(default=None) # antes estaba el str sin Field ahora ponemos la clase HairColor lo cual nos asegura que los valores deben ser lo que pusimos dentro de esta clase       #esto e sun valor opcional pero debe tener un valor por defecto por si la persona no me envia nada tiene que haber algo dentro de hair_color normalmente con dbs es null en python es None esto quiere decir que puede haber algo o no
     is_married: Optional[bool] = Field(default=None)
+
 class Person(PersonBase): #Clase persona el nombre del modelo que llamaremos con la pathoperation de abajo, esta clase debe heredar de BaseModel
     password: str = Field(
     ...,
@@ -54,11 +56,14 @@ class Person(PersonBase): #Clase persona el nombre del modelo que llamaremos con
 class PersonOut(PersonBase):
     pass
      
-# class Location(BaseModel): #Definimos el modelo Location para pedirle al cliente en la path opetaion del put que nos envie dos Request Body
-#     city: str
-#     state: str
-#     country: str
+class Location(BaseModel): #Definimos el modelo Location para pedirle al cliente en la path opetaion del put que nos envie dos Request Body
+    city: str
+    state: str
+    country: str
 
+class LoginOut(BaseModel):
+    username: str = Field(..., max_length=20, example="miguel2021")
+    message: str = Field(default="Login Succesfully!")
 
 #######################################
 @app.get(
@@ -138,4 +143,12 @@ def update_person(
     results = person.dict()                 # para este caso cuandoq queremos combinar dos json debemos hacerlo de manera explicita con person.dict() convertimos el Request body person que viene como json convertido  en un diccionario
     # results.update(Location.dict())  # aqui estamos combinando el diccionarion person con el diccionario location en una sola variable
     return results         # convertir primero person a diccionario y con el metodo update de este diccionario unir otro diccionario
-    
+
+#Forms
+@app.post(
+    path="/login",           #creamos el endpoint
+    response_model=LoginOut,  #esta va ser la respuesta que le vamos a dar al usuario
+    status_code=status.HTTP_200_OK
+)
+def login(username: str = Form(...), password: str = Form(...)): #vamos a recibir dos parametros que van a venir desde un formulario que esta en el fronted, FORM nos sirve para indicar que un parametro dentro de una path operation function viene de un formulario 
+    return LoginOut(username=username)
