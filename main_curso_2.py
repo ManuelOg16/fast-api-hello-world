@@ -1,7 +1,9 @@
 #Respetar este orden importacion para tener el codigo d forma limpia
 #Python importo cosas de esta libreria la cual esta por encima de Pydantic
 from typing import Optional # Con optional puedo hacer tipado estatico
-from enum import Enum   # nos sirve para crear enumeraciones de strings nos va servir para poder definir perfectamente la validación del atributo hair
+from enum import Enum
+from fastapi.datastructures import UploadFile
+from fastapi.param_functions import File   # nos sirve para crear enumeraciones de strings nos va servir para poder definir perfectamente la validación del atributo hair
 
 #Pydantic importamos cosas de esta libreria por que este orden por que Pydantic es una libreria que esta por debajo de FastAPI
 from pydantic import BaseModel #Con BaseModel voy a poder crear modelos dentro de mi API
@@ -15,7 +17,7 @@ from fastapi import Query
 from fastapi import Path
 from fastapi import status #este nos permite acceder a diferentes status code de HTTP
 from fastapi import Form
-from fastapi import Header, Cookie
+from fastapi import Header, Cookie, UploadFile, File
 
 
 
@@ -184,3 +186,18 @@ def contact(
     ads: Optional[str] = Cookie(default=None)       #va controlar las cookies que nos envia este servidor que tenemos que esta trabajando con la API
 ):
     return user_agent  #vamos a ver quien nos esta enviando este mensaje despues de haberlo enviado
+
+#Files 
+@app.post(    #vamos a trabajr con un envio de informacion desde cliente a servidor y en este envio va a venir un archivo hacia nuestra API, vamos a hacer de cuenta que nuestra aplicacion tiene una parte en la que el un cliente puede subir una imagen como en instagram ponemos el endpoint
+    path= "/post-image"
+)             #para urls con - y para funciones en python _
+def post_image(
+    image: UploadFile = File(...)  #FatsAPI usa dos clases para trabajar con archivos Uploadfile= para definir el tipo de variable o de parametro y File= para definir el valor que va contener esa variable o parametro
+):
+    return {
+        "Filename":image.filename,
+        "Format": image.content_type,
+        "Size(kb)":round(len(image.file.read())/1024,ndigits=2) #read para leer el contenido de un archivo en python, la funcion len para obtener la  cantidad de bytes del archivo
+                                            #divido sobre 1024 para obtener los kilobytes y redondeo con Round
+                                            #ndigits=2 muestro los decimales
+    }
