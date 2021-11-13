@@ -88,7 +88,8 @@ def home():  #el primer lugar que un usuario de nuestra API va aparecer cuando e
 @app.post(
     path="/person/new",         #este enpoint es para crear una persona por eso 201
     response_model=PersonOut,
-    status_code=status.HTTP_201_CREATED  
+    status_code=status.HTTP_201_CREATED,
+    tags= ["Persons"]   #como se que la path operation es de personas le pongo un tag 
     ) #con el response_model=PersonOut vamos a devolder todo menos la contraseña xq la borramos en la clase  PersonOut    #vamos a enviar datos desde el cliente al servidor POST , si estuvieramos trayendo datos del servidor al cliente utilizariamos GET
 def create_person(person: Person = Body(...)): #el constructor de esta clase Body lleva una serie de parametros el primero es el ... significa que este Request Body es obligatorio esto significa que un parametro es obligatorio o q un atributo es obligatorio
     return person  #retornamos al parametro person
@@ -97,7 +98,8 @@ def create_person(person: Person = Body(...)): #el constructor de esta clase Bod
 #Validaciones: Query Parameters
 @app.get(
     path="/person/detail",    #estamos obteniendo un resultado y si todo sale bien necesitamos un 200
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    tags= ["Persons"] 
     )
 def show_person(
     name : Optional[str] = Query(
@@ -120,7 +122,10 @@ persons = [1, 2, 3, 4, 5] #una lista con los ids de las personas que si se regis
 #Validaciones: Path Parameters
 @app.get(
     path="/person/detail/{person_id}",
-    status_code=status.HTTP_200_OK)
+    status_code=status.HTTP_200_OK,
+    tags= ["Persons"] 
+    )
+    
 def show_person(
     person_id: int = Path(
     ..., 
@@ -138,9 +143,11 @@ def show_person(
 #Validaciones: Request Body 
 
 @app.put(
-    path="/person/{person_id}",
-    response_model=PersonOut,
-    status_code=status.HTTP_200_OK)     #para actualizar un determinado contenido en nuestra aplicación, cada vez que un usuario haga una peticionde tipo put a este endpoint ("/person/{person_id}") y un id en particular vamos a poder actualizar un contenido de esa persona , el cliente  le va tener que enviar a la API un Request Body
+    path="/person/{person_id}", #para actualizar un determinado contenido en nuestra aplicación, cada vez que un usuario haga una peticionde tipo put a este endpoint ("/person/{person_id}") y un id en particular vamos a poder actualizar un contenido de esa persona , el cliente  le va tener que enviar a la API un Request Body
+    response_model=PersonOut,   
+    status_code=status.HTTP_200_OK,  
+    tags= ["Persons"] 
+    )    
 def update_person(
     person_id: int = Path(
         ...,
@@ -160,7 +167,8 @@ def update_person(
 @app.post(
     path="/login",           #creamos el endpoint
     response_model=LoginOut,  #esta va ser la respuesta que le vamos a dar al usuario
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    tags= ["Persons"] 
 )
 def login(username: str = Form(...), password: str = Form(...)): #vamos a recibir dos parametros que van a venir desde un formulario que esta en el fronted, FORM nos sirve para indicar que un parametro dentro de una path operation function viene de un formulario 
     return LoginOut(username=username)
