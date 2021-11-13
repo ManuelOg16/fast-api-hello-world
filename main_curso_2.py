@@ -1,9 +1,7 @@
 #Respetar este orden importacion para tener el codigo d forma limpia
 #Python importo cosas de esta libreria la cual esta por encima de Pydantic
 from typing import Optional # Con optional puedo hacer tipado estatico
-from enum import Enum
-from fastapi.datastructures import UploadFile
-from fastapi.param_functions import File   # nos sirve para crear enumeraciones de strings nos va servir para poder definir perfectamente la validación del atributo hair
+from enum import Enum    # nos sirve para crear enumeraciones de strings nos va servir para poder definir perfectamente la validación del atributo hair
 
 #Pydantic importamos cosas de esta libreria por que este orden por que Pydantic es una libreria que esta por debajo de FastAPI
 from pydantic import BaseModel #Con BaseModel voy a poder crear modelos dentro de mi API
@@ -18,6 +16,7 @@ from fastapi import Path
 from fastapi import status #este nos permite acceder a diferentes status code de HTTP
 from fastapi import Form
 from fastapi import Header, Cookie, UploadFile, File
+from fastapi import HTTPException
 
 
 
@@ -117,8 +116,8 @@ def show_person(
         ) # pero aqui le vamos a poner que debe ser obligatorio por alguna razon , esto no e slo ideal pero podria pasar, ademas lo obligatorios deben ser un path parameter no un query parameter pero podria llegar a pasar
 ): # vamos a necesitar dos query parameters y los pongo en los parametros de la definicion de la funcion
     return {name: age} # retornamos un json con las dos variables
-
-
+persons = [1, 2, 3, 4, 5] #una lista con los ids de las personas que si se registraron
+#Validaciones: Path Parameters
 @app.get(
     path="/person/detail/{person_id}",
     status_code=status.HTTP_200_OK)
@@ -129,6 +128,11 @@ def show_person(
     example=21 #path y query parametrs automaticos documentacion
     ) 
 ):
+    if person_id not in persons:  #si la persin_id no esta en la lista persons
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="This person doesn't exist!"
+        )      #voy a elevar una excepcion de tipo HTTP
     return{person_id: "It exists!"} #respondemos un json con esta estructura
 
 #Validaciones: Request Body 
