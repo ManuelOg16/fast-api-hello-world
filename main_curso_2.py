@@ -114,7 +114,8 @@ def create_person(person: Person = Body(...)): #el constructor de esta clase Bod
 @app.get(
     path="/person/detail",    #estamos obteniendo un resultado y si todo sale bien necesitamos un 200
     status_code=status.HTTP_200_OK,
-    tags= ["Persons"] 
+    tags= ["Persons"],
+    deprecated= True
     )
 def show_person(
     name : Optional[str] = Query(
