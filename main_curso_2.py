@@ -87,11 +87,26 @@ def home():  #el primer lugar que un usuario de nuestra API va aparecer cuando e
 #vamos a crear personas con sus datos
 @app.post(
     path="/person/new",         #este enpoint es para crear una persona por eso 201
-    response_model=PersonOut,
+    response_model=PersonOut,    #con el response_model=PersonOut vamos a devolder todo menos la contraseña xq la borramos en la clase  PersonOut    #vamos a enviar datos desde el cliente al servidor POST , si estuvieramos trayendo datos del servidor al cliente utilizariamos GET
     status_code=status.HTTP_201_CREATED,
-    tags= ["Persons"]   #como se que la path operation es de personas le pongo un tag 
-    ) #con el response_model=PersonOut vamos a devolder todo menos la contraseña xq la borramos en la clase  PersonOut    #vamos a enviar datos desde el cliente al servidor POST , si estuvieramos trayendo datos del servidor al cliente utilizariamos GET
+    tags= ["Persons"],   #como se que la path operation es de personas le pongo un tag 
+    summary= "Create Person in the app"        #summary un titulo personalizado a la funcion create person
+    )           
 def create_person(person: Person = Body(...)): #el constructor de esta clase Body lleva una serie de parametros el primero es el ... significa que este Request Body es obligatorio esto significa que un parametro es obligatorio o q un atributo es obligatorio
+    #Docstring
+    """
+    Create Person
+
+    This path operation creates a person in the app and save the information in the database
+    
+    Parameters: 
+    - Request body parameter:
+        - **person: Person** -> A person mode with first name, last name, age, hair color and marital status
+        
+    Returns a person model with first name,  last name, age, hair color and marital status
+    
+    """
+    #########
     return person  #retornamos al parametro person
 
 
